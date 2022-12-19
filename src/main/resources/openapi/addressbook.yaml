@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Address Book - OpenAPI 3.0
+  description: |
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:8081/api/v1
+tags:
+  - name: addressbook
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+paths:
+  /persons:
+    get:
+      tags:
+        - addressbook
+      summary: Finds Person
+      description: Find Person
+      operationId: findPerson
+      parameters:
+        - in: header
+          name: X-Request-Correlation-ID
+          schema:
+            type: string
+            format: uuid
+          example: 62bb64b4-7c80-11ed-a1eb-0242ac120002
+          required: true
+        - name: genderFilterCriteria
+          in: query
+          description: Gender values that need to be considered for filter
+          explode: true
+          required: false
+          schema:
+            type: string
+            default: All
+            enum:
+              - Male
+              - Female
+              - All
+        - name: ageFilterCriteria
+          in: query
+          description: Filter criteria for the Age i.e Youngest or Oldest
+          explode: true
+          required: false
+          schema:
+            type: string
+            default: All
+            enum:
+              - Youngest
+              - Oldest
+              - All
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Response-Correlation-Id:
+              schema:
+                type: string
+                format: uuid
+                description: Unique Response Id, same value as Request Correlation ID
+                example: 62bb64b4-7c80-11ed-a1eb-0242ac120002
+            X-Total-Count:
+              schema:
+                type: integer
+                description: Total number of records returned as part of Successful response
+                example: 10
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDetails'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDetails'
+  /persons/{name}:
+    get:
+      tags:
+        - addressbook
+      summary: Difference In Age
+      description: Difference In Age
+      operationId: differenceInAge
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+            example: Bill McKnight
+          required: true
+        - in: header
+          name: X-Request-Correlation-ID
+          schema:
+            type: string
+            format: uuid
+          example: 62bb64b4-7c80-11ed-a1eb-0242ac120002
+          required: true
+        - name: comparisonUnit
+          in: query
+          description: Comparison Unit
+          explode: true
+          required: true
+          schema:
+            type: string
+            default: Days
+            enum:
+              - Days
+        - name: ageComparison
+          in: query
+          description: Age Comparison criteria possible values Older/Younger
+          explode: true
+          required: true
+          schema:
+            type: string
+            default: Older
+            enum:
+              - Older
+        - name: personToCompare
+          in: query
+          description: Person selected from address book to compare
+          explode: true
+          required: true
+          schema:
+            type: string
+            example: Paul Robinson
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Response-Correlation-Id:
+              schema:
+                type: string
+                format: uuid
+                description: Unique Response Id, same value as Request Correlation ID
+                example: 62bb64b4-7c80-11ed-a1eb-0242ac120002
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DifferenceInAge'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDetails'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDetails'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDetails'
+components:
+  schemas:
+    Person:
+      required:
+        - name
+        - gender
+        - dateOfBirth
+      type: object
+      properties:
+        name:
+          type: string
+          description: Person Name
+          example: John Doe
+        gender:
+          type: string
+          description: Person Gender
+          enum:
+            - Male
+            - Female
+        dateOfBirth:
+          type: string
+          description: Person Date of Birth
+          format: date
+    ExceptionDetails:
+      required:
+        - code
+        - message
+        - cause
+      type: object
+      properties:
+        code:
+          type: string
+          description: Exception Code
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          description: Exception Message
+        cause:
+          type: string
+          description: Cause for the exception
+          example: Bad Request
+    DifferenceInAge:
+      required:
+        - count
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of Units - person(in path) is younger or older than  selected person(in query)
+          example: 10
+        unit:
+          type: string
+          description: Unit of comparison
+          enum:
+            - Day(s)
+        criteria:
+          type: string
+          description: Selected criteria of comparison
+          enum:
+            - Older
