@@ -3,6 +3,7 @@ package com.test.addressbook.exception.handlers;
 import com.atlassian.oai.validator.springmvc.InvalidRequestException;
 import com.atlassian.oai.validator.springmvc.InvalidResponseException;
 import com.test.addressbook.model.exception.ExceptionDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
+@Slf4j
 @RestControllerAdvice
 @Order(HIGHEST_PRECEDENCE)
 public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
@@ -23,13 +25,13 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ExceptionDetails> handleInValidRequestException(InvalidRequestException ex, HttpServletRequest httpServletRequest) {
 
         ExceptionDetails exDetails = new ExceptionDetails();
-        if (Optional.ofNullable(ex.getCause()).isPresent()) {
-            Optional.of(ex.getCause().toString()).ifPresent(exDetails::setCause);
-        } else {
-            exDetails.setCause("Bad Request");
-        }
+        String exCause = Optional.ofNullable(ex.getCause()).map(Throwable::toString).
+                orElse("Bad Request");
+        exDetails.setCause(exCause);
         exDetails.setCode("VALIDATION_ERROR");
         exDetails.setMessage(ex.getValidationReport().getMessages().get(0).toString());
+
+        log.error("Validation error occurred with message: {} and cause: {}", exCause, ex.getMessage());
         return new ResponseEntity<>(exDetails,HttpStatus.BAD_REQUEST);
     }
 
@@ -37,13 +39,12 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ExceptionDetails> handleInValidResponseException(InvalidResponseException ex, HttpServletRequest httpServletRequest) {
 
         ExceptionDetails exDetails = new ExceptionDetails();
-        if (Optional.ofNullable(ex.getCause()).isPresent()) {
-            Optional.of(ex.getCause().toString()).ifPresent(exDetails::setCause);
-        } else {
-            exDetails.setCause("Bad Request");
-        }
+        String exCause = Optional.ofNullable(ex.getCause()).map(Throwable::toString).
+                orElse("Bad Response");
         exDetails.setCode("VALIDATION_ERROR");
         exDetails.setMessage(ex.getValidationReport().getMessages().get(0).toString());
+
+        log.error("Validation error occurred with message: {} and cause: {}", exCause, ex.getMessage());
         return new ResponseEntity<>(exDetails,HttpStatus.BAD_REQUEST);
     }
 }
