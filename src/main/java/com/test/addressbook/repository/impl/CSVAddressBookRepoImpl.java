@@ -5,6 +5,7 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.test.addressbook.model.Person;
+import com.test.addressbook.model.exception.PersonNotFoundException;
 import com.test.addressbook.repository.AddressBookRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,21 @@ public class CSVAddressBookRepoImpl implements AddressBookRepo {
             throw new RuntimeException(e);
         }
         return listOfPerson;
+    }
+
+    @Override
+    public Person getPersonByName(String name) {
+        List<Person> listOfPerson = this.getListOfPerson();
+
+        Person searchedPerson = listOfPerson.stream()
+                .filter(person -> (person.getName() != null))
+                .filter(person -> person.getName().equals(name))
+                .findFirst().orElseThrow(() -> {
+                    log.error("Person not found by name: {}", name);
+                    return new PersonNotFoundException("Person not Found: " + name);
+                });
+
+        return searchedPerson;
     }
 
     private final DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/")

@@ -5,6 +5,8 @@ import com.test.addressbook.model.Person;
 import java.util.List;
 
 public interface AddressBookRepo {
-    public List<Person> getListOfPerson();
+    List<Person> getListOfPerson();
+
+    Person getPersonByName(String name);
 
 }
