@@ -28,7 +28,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         exDetails.setCause(exCause);
         exDetails.setCode("INVALID_CRITERIA_SELECTED_EXCEPTION");
         exDetails.setMessage(throwable.getMessage());
-        log.error("Business error occurred with message: {} and cause: {}", exCause, throwable.getMessage());
+        log.error("Business error occurred with message: {} and cause: {}", throwable.getMessage(), exCause);
 
         return new ResponseEntity<>(exDetails,HttpStatus.BAD_REQUEST);
     }
@@ -43,7 +43,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         exDetails.setCause(exCause);
         exDetails.setCode("PERSON_NOT_FOUND_EXCEPTION");
         exDetails.setMessage(throwable.getMessage());
-        log.error("Business error occurred with message: {} and cause: {}", exCause, throwable.getMessage());
+        log.error("Business error occurred with message: {} and cause: {}", throwable.getMessage(), exCause);
 
         return new ResponseEntity<>(exDetails,HttpStatus.NOT_FOUND);
     }
