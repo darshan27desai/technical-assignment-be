@@ -1,5 +1,6 @@
 package com.test.addressbook.controller;
 
+import com.test.addressbook.model.DifferenceInAge;
 import com.test.addressbook.model.Person;
 import com.test.addressbook.service.AddressBookService;
 import io.swagger.annotations.ApiParam;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
 @RestController
@@ -41,6 +44,25 @@ public class AddressBookController {
         httpHeaders.add("X-Total-Count", String.valueOf(resultantList.size()));
 
         return new ResponseEntity<>(resultantList, httpHeaders, HttpStatus.OK);
+    }
+
+
+    @ResponseBody
+    @GetMapping(path = "/persons/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DifferenceInAge> differenceInAge(
+            @Valid @PathVariable(value= "name", required = true) String name,
+            @RequestHeader(value = "X-Request-Correlation-Id") String requestCorrelationId,
+            @ApiParam(value = "Comparison Unit", allowableValues = "Days", defaultValue = "Days")
+            @Valid @RequestParam(value = "comparisonUnit", defaultValue="Days") String comparisonUnit,
+            @ApiParam(value = "Age Comparison criteria possible values Older", allowableValues = "Older", defaultValue = "Older")
+            @Valid @RequestParam(value = "ageComparison", required = false, defaultValue="Older") String ageComparison,
+            @ApiParam(value = "Person selected from address book to compare")
+            @Valid @RequestParam(value = "personToCompare", required = true) String personToCompare) throws UnsupportedEncodingException {
+
+        DifferenceInAge differenceInAge =  addressBookService.getDifferenceOfAge(URLDecoder.decode(name, "UTF-8"), URLDecoder.decode(personToCompare, "UTF-8"), comparisonUnit, ageComparison);
+
+        return new ResponseEntity<>(differenceInAge, HttpStatus.OK);
+
     }
 
 }
