@@ -31,7 +31,7 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
         exDetails.setCode("VALIDATION_ERROR");
         exDetails.setMessage(ex.getValidationReport().getMessages().get(0).toString());
 
-        log.error("Validation error occurred with message: {} and cause: {}", exCause, ex.getMessage());
+        log.error("Validation error occurred with message: {} and cause: {}", ex.getMessage(), exCause);
         return new ResponseEntity<>(exDetails,HttpStatus.BAD_REQUEST);
     }
 
@@ -44,7 +44,7 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
         exDetails.setCode("VALIDATION_ERROR");
         exDetails.setMessage(ex.getValidationReport().getMessages().get(0).toString());
 
-        log.error("Validation error occurred with message: {} and cause: {}", exCause, ex.getMessage());
+        log.error("Validation error occurred with message: {} and cause: {}", ex.getMessage(), exCause);
         return new ResponseEntity<>(exDetails,HttpStatus.BAD_REQUEST);
     }
 }
