@@ -1,6 +1,9 @@
 package com.test.addressbook.service;
 
+
+import com.test.addressbook.model.DifferenceInAge;
 import com.test.addressbook.model.Person;
+import com.test.addressbook.model.exception.InvalidCriteriaException;
 import com.test.addressbook.repository.impl.CSVAddressBookRepoImpl;
 import com.test.addressbook.service.impl.CSVAddressBookServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +17,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 
@@ -140,5 +143,58 @@ public class CSVAddressBookServiceImplTest {
         when(csvAddressBookRepo.getListOfPerson()).thenReturn(personList);
 
         assertEquals(resultantList, csvAddressBookService.getAddressBook("female", "youngest"));
+    }
+
+    @Test
+    public void testGetDifferenceOfAgeInvalidCriteria(){
+
+        List<Person> personList  = new ArrayList<>();
+
+        Person person1 = Person.builder().name("John Doe")
+                .dateOfBirth(LocalDate.of(1999, 12, 01)).gender(Person.GenderEnum.MALE).build();
+
+        Person person2 = Person.builder().name("Jack Doe")
+                .dateOfBirth(LocalDate.of(1970, 11, 01)).gender(Person.GenderEnum.MALE).build();
+
+        Person person3 = Person.builder().name("Jane Doe")
+                .dateOfBirth(LocalDate.of(1999, 11, 01)).gender(Person.GenderEnum.FEMALE).build();
+
+        personList.add(person1);
+        personList.add(person2);
+        personList.add(person3);
+
+        when(csvAddressBookRepo.getPersonByName("Jack Doe")).thenReturn(person2);
+        when(csvAddressBookRepo.getPersonByName("John Doe")).thenReturn(person1);
+
+        InvalidCriteriaException invalidCriteriaException = assertThrows(
+                InvalidCriteriaException.class,
+                () -> csvAddressBookService.getDifferenceOfAge("John Doe", "Jack Doe", "months", "older"));
+
+        assertTrue(invalidCriteriaException.getMessage().contentEquals("Invalid Age Comparison Criteria Selected"));
+    }
+
+    @Test
+    public void testGetDifferenceOfAgePositiveScenario(){
+
+        List<Person> personList  = new ArrayList<>();
+
+        Person person1 = Person.builder().name("John Doe")
+                .dateOfBirth(LocalDate.of(1999, 12, 01)).gender(Person.GenderEnum.MALE).build();
+
+        Person person2 = Person.builder().name("Jack Doe")
+                .dateOfBirth(LocalDate.of(1970, 11, 01)).gender(Person.GenderEnum.MALE).build();
+
+        Person person3 = Person.builder().name("Jane Doe")
+                .dateOfBirth(LocalDate.of(1999, 11, 01)).gender(Person.GenderEnum.FEMALE).build();
+
+        personList.add(person1);
+        personList.add(person2);
+        personList.add(person3);
+
+        when(csvAddressBookRepo.getPersonByName("Jack Doe")).thenReturn(person2);
+        when(csvAddressBookRepo.getPersonByName("John Doe")).thenReturn(person1);
+
+        DifferenceInAge diff = csvAddressBookService.getDifferenceOfAge("Jack Doe", "John Doe", "days", "older");
+        assertEquals(10622L, diff.getCount());
     }
 }
