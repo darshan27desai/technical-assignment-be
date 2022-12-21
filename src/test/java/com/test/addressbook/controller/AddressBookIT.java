@@ -50,4 +50,19 @@ public class AddressBookIT {
         JSONAssert.assertEquals(expected, response.getBody().toString(), false);
     }
 
+    @Test
+    public void testGetDifferenceOfAge() throws JSONException {
+
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Request-Correlation-ID", UUID.randomUUID().toString());
+
+        HttpEntity<String> request =
+                new HttpEntity<String>(headers);
+
+        ResponseEntity<String> response = this.testRestTemplate.exchange(
+                "/persons/Jane%20Doe?ageComparison=Older&comparisonUnit=Days&personToCompare=John%20Doe",
+                HttpMethod.GET, request, String.class);
+        log.info(response.getBody().toString());
+    }
 }
